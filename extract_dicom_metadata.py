@@ -1,1 +1,14 @@
-print("hello")
+import pydicom
+
+def print_dicom_header_info(dicom_file_path):
+    ds = pydicom.dcmread(dicom_file_path)
+    print(ds)
+
+ct1a = r"Z:\Research\RADONC_S\Krishni\MorganHenshaw\PatientData\nlst\100002\1.2.840.113654.2.55.187766322555605983451267194286230980878\CT_1.2.840.113654.2.55.107058971791399096468046631579934786083\81cac630-1f61-4604-b54e-14c7cee4b222.dcm"
+ct1b = r"Z:\Research\RADONC_S\Krishni\MorganHenshaw\PatientData\nlst\100002\1.2.840.113654.2.55.187766322555605983451267194286230980878\CT_1.2.840.113654.2.55.107058971791399096468046631579934786083\3500c08e-3369-445a-8d2e-266127c8bb11.dcm"
+ct2a = r"Z:\Research\RADONC_S\Krishni\MorganHenshaw\PatientData\nlst\100002\1.2.840.113654.2.55.187766322555605983451267194286230980878\CT_1.2.840.113654.2.55.122344168497038128022524906545138736420\0c46dabb-8fe3-4867-9bc7-6c79eefbfaa1.dcm"
+seg = r"Z:\Research\RADONC_S\Krishni\MorganHenshaw\PatientData\nlst\100002\1.2.840.113654.2.55.187766322555605983451267194286230980878\SEG_1.2.276.0.7230010.3.1.3.313263360.20363.1706320514.804396\16132f7a-ac98-4b37-b9e0-66cf531c5bff.dcm"
+print_dicom_header_info(ct1a)
+
+# Can also access attributes directly with tags
+# print(f"Modality: {ds.Modality}")
