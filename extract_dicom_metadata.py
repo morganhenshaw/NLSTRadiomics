@@ -9,7 +9,10 @@ ct1b = r"Z:\Research\RADONC_S\Krishni\MorganHenshaw\PatientData\nlst\100002\1.2.
 ct2a = r"Z:\Research\RADONC_S\Krishni\MorganHenshaw\PatientData\nlst\100002\1.2.840.113654.2.55.187766322555605983451267194286230980878\CT_1.2.840.113654.2.55.122344168497038128022524906545138736420\0c46dabb-8fe3-4867-9bc7-6c79eefbfaa1.dcm"
 seg = r"Z:\Research\RADONC_S\Krishni\MorganHenshaw\PatientData\nlst\100002\1.2.840.113654.2.55.187766322555605983451267194286230980878\SEG_1.2.276.0.7230010.3.1.3.313263360.20363.1706320514.804396\16132f7a-ac98-4b37-b9e0-66cf531c5bff.dcm"
 sr = r"Z:\Research\RADONC_S\Krishni\MorganHenshaw\PatientData\nlst\100002\1.2.840.113654.2.55.187766322555605983451267194286230980878\SR_1.2.276.0.7230010.3.1.3.313263360.24150.1706320738.382516\9182cf06-3957-470e-9e32-1131a332e3e1.dcm"
-print_dicom_header_info(sr)
+# print_dicom_header_info(sr)
 
-# Can also access attributes directly with tags
-# print(f"Modality: {ds.Modality}")
+
+
+seg_file = r"Z:\Research\RADONC_S\Krishni\MorganHenshaw\PatientData\nlst\100002\1.2.840.113654.2.55.187766322555605983451267194286230980878\SEG_1.2.276.0.7230010.3.1.3.313263360.20363.1706320514.804396\16132f7a-ac98-4b37-b9e0-66cf531c5bff.dcm"
+dcm = pydicom.dcmread(seg_file)
+print(dcm.ReferencedSeriesSequence[0].SeriesInstanceUID)
