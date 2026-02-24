@@ -1,0 +1,34 @@
+Category,Characteristic,Count,Percentage
+Age,55-59 years,11215,42.72%
+Age,60-64 years,8033,30.60%
+Age,65-69 years,4691,17.87%
+Age,70-74 years,2312,8.81%
+Age,<55 years,2,0.01%
+Age,>=75 years,1,0.00%
+Sex,Male,15512,59.08%
+Sex,Female,10742,40.92%
+Race/Ethnicity,White,23969,91.30%
+Race/Ethnicity,Black or African-American,1135,4.32%
+Race/Ethnicity,Asian,547,2.08%
+Race/Ethnicity,More than one race,327,1.25%
+Race/Ethnicity,American Indian or Alaskan Native,88,0.34%
+Race/Ethnicity,Native Hawaiian or Other Pacific Islander,87,0.33%
+Race/Ethnicity,Participant refused to answer,52,0.20%
+Race/Ethnicity,Unknown/ decline to answer,37,0.14%
+Race/Ethnicity,Missing data form - form is not expected to ever be completed,8,0.03%
+Race/Ethnicity,Missing - no response,2,0.01%
+Race/Ethnicity,Missing - form was submitted and the answer was left blank,2,0.01%
+Cigarette Smoking Status,Former,13666,52.05%
+Cigarette Smoking Status,Current,12588,47.95%
+Lung Cancer Stage,Missing,25193,95.96%
+Lung Cancer Stage,Stage IA,416,1.58%
+Lung Cancer Stage,Stage IV,235,0.90%
+Lung Cancer Stage,Stage IIIB,121,0.46%
+Lung Cancer Stage,Stage IB,104,0.40%
+Lung Cancer Stage,Stage IIIA,95,0.36%
+Lung Cancer Stage,Stage IIB,38,0.14%
+Lung Cancer Stage,Stage IIA,35,0.13%
+Lung Cancer Stage,"Unknown, cannot be assessed",9,0.03%
+Lung Cancer Stage,"Carcinoid, cannot be assessed",4,0.02%
+Lung Cancer Stage,Occult Carcinoma,3,0.01%
+Lung Cancer Stage,TNM not available,1,0.00%
