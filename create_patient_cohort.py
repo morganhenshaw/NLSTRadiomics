@@ -1,9 +1,9 @@
 import os
 from google.cloud import bigquery
 
-# Environment setup
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"Z:\Research\RADONC_S\Krishni\MorganHenshaw\nlst-radiomics-b0de7f6a4d17.json"
 client = bigquery.Client(project="nlst-radiomics")
+output_csv = r"Z:\Research\RADONC_S\Krishni\MorganHenshaw\patientIDs_and_seriesInstanceUIDs.csv"
 
 lung_nodule_seg_series_descriptions = [
     'AIMI lung and nodule radiologist 5 corrected segmentation',
@@ -37,29 +37,18 @@ WHERE
     )
 """
 
-query_result = client.query(query)
-patient_cohort_unfiltered = query_result.result().to_dataframe()
+df = client.query(query).to_dataframe()
 
 # Currently there are more SEG series than CT series; this is because some CT series have AI segmentation and radiologist corrected segmentation
-# "Keep" the radiologist corrected segmentation by creating a priority column: 0 if radiologist corrected, 1 if AI
-ignore_seg_series_description = "AIMI lung and nodule AI segmentation"
-patient_cohort_unfiltered['Priority'] = patient_cohort_unfiltered['SEG_SeriesDescription'].apply(lambda x: 1 if x == ignore_seg_series_description else 0)
-partient_cohort_sorted = patient_cohort_unfiltered.sort_values(by=['CT_SeriesInstanceUID', 'Priority'])
-patient_cohort = partient_cohort_sorted.drop_duplicates(subset='CT_SeriesInstanceUID', keep='first')
+# "Keep" the radiologist corrected segmentation by creating a priority column
+ignore_desc = "AIMI lung and nodule AI segmentation"
+df['Priority'] = (df['SEG_SeriesDescription'] == ignore_desc).astype(int)
+df_sorted = df.sort_values(by=['CT_SeriesInstanceUID', 'Priority'])
+df_clean = df_sorted.drop_duplicates(subset='CT_SeriesInstanceUID', keep='first')
 
-# create dictionary where key is PatientID and value is list of CTSeriesInstanceUIDs and SEGSeriesInstanceUIDs
-patients_series_uids = {}
-for patient_id in patient_cohort['PatientID'].unique():
-    patient_df = patient_cohort[patient_cohort['PatientID'] == patient_id]
-    ct_uids = patient_df['CT_SeriesInstanceUID'].tolist()
-    seg_uids = patient_df['SEG_SeriesInstanceUID'].tolist()
-    all_series_uids = ct_uids + seg_uids
-    patients_series_uids[patient_id] = all_series_uids
-
-
-# SANITY CHECKS 
-# for i, (key, value) in enumerate(patients_series_uids.items()):
-#     if i==5:
-#         break
-#     print(f"{key}: {value}")
-# print(len(patients_series_uids))
+final_df = df_clean[['PatientID', 'CT_SeriesInstanceUID', 'SEG_SeriesInstanceUID']]
+final_df = final_df.sort_values(by=['PatientID', 'CT_SeriesInstanceUID'])
+final_df.to_csv(output_csv, index=False)
+final_df['Status'] = "Unprocessed"
+final_df.to_csv(output_csv, index=False)
+print(f"PatientIDs and SeriesInstanceUIDs saved to {output_csv}")
