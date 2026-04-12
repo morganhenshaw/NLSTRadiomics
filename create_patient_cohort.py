@@ -1,9 +1,9 @@
 import os
 from google.cloud import bigquery
+from config import COHORT_CSV, CREDENTIALS_PATH
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"Z:\Research\RADONC_S\Krishni\MorganHenshaw\nlst-radiomics-b0de7f6a4d17.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = CREDENTIALS_PATH
 client = bigquery.Client(project="nlst-radiomics")
-output_csv = r"Z:\Research\RADONC_S\Krishni\MorganHenshaw\patientIDs_and_seriesInstanceUIDs.csv"
 
 lung_nodule_seg_series_descriptions = [
     'AIMI lung and nodule radiologist 5 corrected segmentation',
@@ -17,6 +17,7 @@ SELECT
     DISTINCT seg.SeriesInstanceUID as SEG_SeriesInstanceUID,
     seg.SeriesDescription AS SEG_SeriesDescription,
     ct.SeriesInstanceUID as CT_SeriesInstanceUID,
+    ct.StudyInstanceUID as StudyInstanceUID,
     ct.PatientID
 FROM
     `bigquery-public-data.idc_v23.dicom_all` AS ct
@@ -46,9 +47,9 @@ df['Priority'] = (df['SEG_SeriesDescription'] == ignore_desc).astype(int)
 df_sorted = df.sort_values(by=['CT_SeriesInstanceUID', 'Priority'])
 df_clean = df_sorted.drop_duplicates(subset='CT_SeriesInstanceUID', keep='first')
 
-final_df = df_clean[['PatientID', 'CT_SeriesInstanceUID', 'SEG_SeriesInstanceUID']]
-final_df = final_df.sort_values(by=['PatientID', 'CT_SeriesInstanceUID'])
-final_df.to_csv(output_csv, index=False)
+final_df = df_clean[['PatientID', 'StudyInstanceUID', 'CT_SeriesInstanceUID', 'SEG_SeriesInstanceUID']]
+final_df = final_df.sort_values(by=['PatientID', 'StudyInstanceUID'])
+final_df.to_csv(COHORT_CSV, index=False)
 final_df['Status'] = "Unprocessed"
-final_df.to_csv(output_csv, index=False)
-print(f"PatientIDs and SeriesInstanceUIDs saved to {output_csv}")
+final_df.to_csv(COHORT_CSV, index=False)
+print(f"PatientIDs and SeriesInstanceUIDs saved to {COHORT_CSV}")
