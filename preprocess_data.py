@@ -29,10 +29,10 @@ def main(batch_size=2):
 
     # Use enumerate to get the current count (i) starting at 1
     for i, (index, row) in enumerate(work_queue.iterrows(), 1):
-        pid = row['PatientID']
-        study_uid = row['StudyInstanceUID']
-        ct_uid = row['CT_SeriesInstanceUID']
-        seg_uid = row['SEG_SeriesInstanceUID']
+        pid = str(row['PatientID'])
+        study_uid = str(row['StudyInstanceUID'])
+        ct_uid = str(row['CT_SeriesInstanceUID'])
+        seg_uid = str(row['SEG_SeriesInstanceUID'])
         print(f"\n[{i}/{total_in_batch}] Processing Patient: {pid} , Study: {study_uid}")
         print("-" * 30)
         start_total = time.time()

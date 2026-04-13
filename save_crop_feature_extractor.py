@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pydicom.config import settings
 
-from radiomics.featureextractor import RadiomicsFeatureExtractor, _SingletonGeometryTolerance
+from radiomics.featureextractor import RadiomicsFeatureExtractor
 
 import collections
 import json
@@ -24,6 +24,26 @@ from radiomics import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class _SingletonGeometryTolerance:
+    _instance = None
+    _initialized = False
+    _lock = threading.Lock()
+
+    def __new__(cls, *_args, **_kwargs):
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self, tolerance=None):
+        if not self._initialized:
+            with self._lock:
+                if not self._initialized:
+                    self.geometryTolerance = tolerance
+                    _SingletonGeometryTolerance._initialized = True
 
 class SaveCropFeatureExtractor(RadiomicsFeatureExtractor):
     def execute(
