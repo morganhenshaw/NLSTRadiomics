@@ -1,8 +1,8 @@
+from __future__ import annotations
+
 from pydicom.config import settings
 
 from radiomics.featureextractor import RadiomicsFeatureExtractor, _SingletonGeometryTolerance
-
-from __future__ import annotations
 
 import collections
 import json
@@ -12,7 +12,7 @@ import pathlib
 import threading
 from itertools import chain
 
-import pykwalify.core
+# import pykwalify.core
 import SimpleITK as sitk
 
 from radiomics import (
