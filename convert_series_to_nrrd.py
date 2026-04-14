@@ -34,19 +34,38 @@ def convert_SEG_to_nrrd(pid, study_uid, seg_uid):
     try:
         subprocess.run(command, check=True, capture_output=True, text=True)
         os.rename(os.path.join(output_dir, "SEG-1.nrrd"), os.path.join(output_dir, "lung.nrrd"))
-        os.rename(os.path.join(output_dir, "SEG-2.nrrd"), os.path.join(output_dir, "nodule.nrrd"))
+        os.rename(os.path.join(output_dir, "SEG-2.nrrd"), os.path.join(output_dir, "nodules.nrrd"))
     except subprocess.CalledProcessError as e:
         print(f"SEG conversion failed for patient {pid}, study {study_uid}: {e.stderr}")
         raise e
     except FileNotFoundError as e:
         print(f"Renaming the .nrrd files failed for patient {pid}, study {study_uid}: {e}")
         raise e
+    
+def separate_nodules(pid, study_uid):
+    nodules_path = os.path.join(DOWNLOAD_DIR, pid, study_uid, "nodules.nrrd")
+    nodules_image = sitk.ReadImage(nodules_path)
+
+    cc_filter = sitk.ConnectedComponentImageFilter()
+    labeled_image = cc_filter.Execute(nodules_image > 0)
+    num_nodules = cc_filter.GetObjectCount()
+    for i in range(1, num_nodules + 1):
+        nodule_mask = sitk.BinaryThreshold(labeled_image, lowerThreshold=i, upperThreshold=i, insideValue=1, outsideValue=0)
+        output_path = os.path.join(DOWNLOAD_DIR, pid, study_uid, f"nodule_{i}.nrrd")
+        sitk.WriteImage(nodule_mask, output_path)
+    return num_nodules
 
 def delete_series(pid, study_uid, ct_uid, seg_uid):
     study_path = os.path.join(DOWNLOAD_DIR, pid, study_uid)
     meta_json = os.path.join(study_path, "SEG-meta.json")
-    if os.path.exists(meta_json):
-        os.remove(meta_json)
+    ct_path = os.path.join(study_path, "CT.nrrd")
+    lung_path = os.path.join(study_path, "lung.nrrd")
+    nodules_path = os.path.join(study_path, "nodules.nrrd")
+    lung_aligned_path = os.path.join(study_path, "lung_aligned.nrrd")
+    nodules_aligned_path = os.path.join(study_path, "nodules_aligned.nrrd")
+    for path in [meta_json, ct_path, lung_path, nodules_path, lung_aligned_path, nodules_aligned_path]:
+        if os.path.exists(path):
+            os.remove(path)
     ct_dir = os.path.join(study_path, "CT_" + ct_uid)
     seg_dir = os.path.join(study_path, "SEG_" + seg_uid)
     for folder in [ct_dir, seg_dir]:

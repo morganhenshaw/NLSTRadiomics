@@ -1,5 +1,6 @@
-from convert_series_to_nrrd import convert_CT_to_nrrd, convert_SEG_to_nrrd, delete_series
+from convert_series_to_nrrd import convert_CT_to_nrrd, convert_SEG_to_nrrd, delete_series, separate_nodules
 from extract_ct_header import extract_ct_header_info
+from plot_ct_with_masks import align_masks, plot_ct_with_masks
 from config import BASE_DIR, DOWNLOAD_DIR, COHORT_CSV, TIMING_LOG
 from extract_features import extract_features
 import time
@@ -19,7 +20,7 @@ def log_performance(pid, study_uid, t_download, t_header, t_convert, t_features,
         writer.writerow([pid, study_uid, round(t_download, 2), round(t_header, 2), round(t_convert, 2), round(t_features, 2), round(t_total, 2)])
 
 # batch_size is number of series to be processed
-def main(batch_size=2):
+def main(batch_size=2, plot=False):
     df = pd.read_csv(COHORT_CSV)
     work_queue = df[df['Status'] == 'Unprocessed'].head(batch_size)
     total_in_batch = len(work_queue)
@@ -27,7 +28,6 @@ def main(batch_size=2):
         print("No unprocessed data found.")
         return
 
-    # Use enumerate to get the current count (i) starting at 1
     for i, (index, row) in enumerate(work_queue.iterrows(), 1):
         pid = str(row['PatientID'])
         study_uid = str(row['StudyInstanceUID'])
@@ -41,8 +41,7 @@ def main(batch_size=2):
             print(f"Downloading CT and SEG series")
             start_time = time.time()
             client.download_from_selection(seriesInstanceUID=ct_uid, downloadDir=BASE_DIR)
-            client.download_dicom_series(ct_uid, DOWNLOAD_DIR)
-            client.download_dicom_series(seg_uid, DOWNLOAD_DIR)
+            client.download_from_selection(seriesInstanceUID=seg_uid, downloadDir=BASE_DIR)
             t_download = time.time() - start_time
             
             print(f"Extracting CT header information")
@@ -54,13 +53,19 @@ def main(batch_size=2):
             start_time = time.time()
             convert_CT_to_nrrd(pid, ct_uid, study_uid)
             convert_SEG_to_nrrd(pid, seg_uid, study_uid)
+            num_nodules = separate_nodules(pid, study_uid)
+            df.at[index, 'NumNodules'] = num_nodules
             t_convert = time.time() - start_time
+
+            if plot:
+                print(f"Aligning masks and plotting CT with masks")
+                align_masks(pid, study_uid)
+                plot_ct_with_masks(pid, study_uid)
 
             print(f"Extracting radiomic features")
             start_time = time.time()
-            extract_features(pid, study_uid)
+            extract_features(pid, study_uid, num_nodules)
             t_features = time.time() - start_time
-
             print(f"Deleting series data")
             delete_series(pid, study_uid, ct_uid, seg_uid)
             t_total = time.time() - start_total
@@ -82,4 +87,4 @@ def main(batch_size=2):
     print(f"\nProcessed {batch_size} series.")
 
 if __name__ == "__main__":
-    main(batch_size=2)
+    main(batch_size=2, plot=True)
