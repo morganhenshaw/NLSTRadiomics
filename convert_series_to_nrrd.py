@@ -44,21 +44,32 @@ def convert_SEG_to_nrrd(pid, study_uid, seg_uid):
     
 def separate_nodules(pid, study_uid):
     nodules_path = os.path.join(DOWNLOAD_DIR, pid, study_uid, "nodules.nrrd")
-    nodules_image = sitk.ReadImage(nodules_path)
+    mask = sitk.ReadImage(nodules_path)
+    
+    labeled_mask = sitk.ConnectedComponent(mask != 0)
+    labeled_mask = sitk.RelabelComponent(labeled_mask)
+    
+    stats = sitk.LabelShapeStatisticsImageFilter()
+    stats.Execute(labeled_mask)
+    
+    labels = stats.GetLabels()
+    spacing = labeled_mask.GetSpacing()
 
-    cc_filter = sitk.ConnectedComponentImageFilter()
-    labeled_image = cc_filter.Execute(nodules_image > 0)
-    num_nodules = cc_filter.GetObjectCount()
+    nodules_dim = []
+    for label in labels:
+        single_nodule = (labeled_mask == label)
 
-    label_shape_filter = sitk.LabelShapeStatisticsImageFilter()
-    label_shape_filter.Execute(labeled_image)
-    nodules_sizes = [label_shape_filter.GetNumberOfPixels(i) for i in range(1, num_nodules + 1)]
-
-    for i in range(1, num_nodules + 1):
-        nodule_mask = sitk.BinaryThreshold(labeled_image, lowerThreshold=i, upperThreshold=i, insideValue=1, outsideValue=0)
-        output_path = os.path.join(DOWNLOAD_DIR, pid, study_uid, f"nodule_{i}.nrrd")
-        sitk.WriteImage(nodule_mask, output_path)
-    return nodules_sizes
+        output_path = os.path.join(DOWNLOAD_DIR, pid, study_uid, f"nodule_id_{label}.nrrd")
+        sitk.WriteImage(sitk.Cast(single_nodule, sitk.sitkUInt8), output_path)
+        
+        # [x_start, y_start, z_start, x_width, y_width, z_depth]
+        bbox = stats.GetBoundingBox(label)
+        dim_x = bbox[3] * spacing[0]
+        dim_y = bbox[4] * spacing[1]
+        dim_z = bbox[5] * spacing[2]
+        dim_xyz = [dim_x, dim_y, dim_z]
+        nodules_dim.append(dim_xyz) 
+    return nodules_dim
 
 def delete_series(pid, study_uid, ct_uid, seg_uid):
     study_path = os.path.join(DOWNLOAD_DIR, pid, study_uid)

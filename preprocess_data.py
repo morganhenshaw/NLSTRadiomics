@@ -22,9 +22,9 @@ def log_nodule_sizes(pid, study_uid, nodules_sizes):
     with open(NODULES_CSV, "a", newline='') as f:
         writer = csv.writer(f)
         if not file_exists:
-            writer.writerow(["PatientID", "StudyInstanceUID", "NoduleID", "NumVoxels"])
-        for i, num_voxels in enumerate(nodules_sizes, start=1):
-            writer.writerow([pid, study_uid, i, num_voxels])
+            writer.writerow(["PatientID", "StudyInstanceUID", "NoduleID", "Dim_X", "Dim_Y", "Dim_Z"])
+        for i, nodule_size in enumerate(nodules_sizes, start=1):
+            writer.writerow([pid, study_uid, i, nodule_size[0], nodule_size[1], nodule_size[2]])
 
 # batch_size is number of series to be processed
 def main(batch_size=2):
@@ -85,4 +85,4 @@ def main(batch_size=2):
     print(f"\nProcessed {batch_size} series.")
 
 if __name__ == "__main__":
-    main(batch_size=2, plot=True)
+    main(batch_size=2)
