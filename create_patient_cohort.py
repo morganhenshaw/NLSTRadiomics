@@ -50,7 +50,7 @@ df_clean = df_sorted.drop_duplicates(subset='CT_SeriesInstanceUID', keep='first'
 final_df = df_clean[['PatientID', 'StudyInstanceUID', 'CT_SeriesInstanceUID', 'SEG_SeriesInstanceUID']]
 final_df = final_df.sort_values(by=['PatientID', 'StudyInstanceUID'])
 final_df.to_csv(COHORT_CSV, index=False)
-final_df['Status'] = "Unprocessed"
 final_df['NumNodules'] = 0
+final_df['Status'] = "Unprocessed"
 final_df.to_csv(COHORT_CSV, index=False)
 print(f"PatientIDs and SeriesInstanceUIDs saved to {COHORT_CSV}")

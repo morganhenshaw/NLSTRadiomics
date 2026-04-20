@@ -10,7 +10,7 @@ def extract_features(pid, study_id, num_nodules):
         nodule_path = os.path.join(DOWNLOAD_DIR, pid, study_id, f"nodule_{i}.nrrd")
         settings = {
             'resegmentRange': [-1000, 2000], # Excludes air and bone (HU scale) for feature calculation
-            'label': 2, # Label 2 is nodule
+            'label': 1, # Label 2 is nodule
             'interpolator': 'sitkBSpline',
             'resampledPixelSpacing': [1.0, 1.0, 1.0]
         }
